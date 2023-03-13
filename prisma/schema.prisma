@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -8,4 +5,52 @@ generator client {
 datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
+}
+
+model images {
+  id       Int        @id @default(autoincrement())
+  blurhash String     @db.VarChar(45)
+  url      String     @db.VarChar(200)
+  projects projects[]
+  user     user[]
+}
+
+model user {
+  id        Int       @id @default(autoincrement())
+  firstName String    @db.VarChar(45)
+  lastName  String    @db.VarChar(45)
+  email     String    @db.VarChar(45)
+  photo_id  Int
+  reviews   reviews[]
+  images    images    @relation(fields: [photo_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "user_images_fk")
+
+  @@index([photo_id], map: "user_images_fk_idx")
+}
+
+model projects {
+  id          Int       @id @default(autoincrement())
+  title       String    @db.VarChar(45)
+  description String    @db.VarChar(4500)
+  est_time    String    @db.VarChar(45)
+  est_cost    Int
+  status      String    @default("UPCOMING") @db.VarChar(45)
+  image_id    Int       @default(1)
+  images      images    @relation(fields: [image_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "projects_image_fk")
+  reviews     reviews[]
+
+  @@index([image_id], map: "image_id_idx")
+}
+
+model reviews {
+  id         Int      @default(autoincrement())
+  rating     Decimal  @db.Decimal(10, 0)
+  review     String   @db.VarChar(500)
+  user_id    Int
+  project_id Int
+  projects   projects @relation(fields: [project_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "reviews_project_fk")
+  user       user     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "reviews_user_fk")
+
+  @@id([id, project_id, user_id, review, rating])
+  @@index([project_id], map: "reviews_project_fk_idx")
+  @@index([user_id], map: "reviews_user_fk_idx")
 }
