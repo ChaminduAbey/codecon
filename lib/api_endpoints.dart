@@ -16,7 +16,25 @@ class ApiEndpoints {
     return "$baseUrl/projects";
   }
 
+  static String getProjectById({
+    required int projectId,
+  }) {
+    return "$baseUrl/projects/$projectId";
+  }
+
   static String addReview() {
     return "$baseUrl/reviews";
+  }
+
+  static String getIssuer({
+    required int issuerId,
+  }) {
+    return "$baseUrl/issuers/$issuerId";
+  }
+
+  static String getContractor({
+    required int contractorId,
+  }) {
+    return "$baseUrl/contractors/$contractorId";
   }
 }

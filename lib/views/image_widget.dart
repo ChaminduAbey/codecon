@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:blurhash_dart/blurhash_dart.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:client_app/models/cdn_image.dart';
 import 'package:flutter/material.dart';
 import 'package:image/image.dart' as img;
 
@@ -23,6 +24,18 @@ class ImageWidget extends StatefulWidget {
     this.width,
     this.filterQuality = FilterQuality.medium,
   }) : super(key: key);
+
+  ImageWidget.fromCdn(
+    CdnImage cdnImage, {
+    Key? key,
+    this.fit = BoxFit.cover,
+    this.imageBuilder,
+    this.height,
+    this.width,
+    this.filterQuality = FilterQuality.medium,
+  })  : this.imageUrl = cdnImage.url,
+        this.blurhash = cdnImage.blurhash,
+        super(key: key);
 
   @override
   _ImageWidgetState createState() => _ImageWidgetState();

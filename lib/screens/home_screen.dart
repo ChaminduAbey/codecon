@@ -155,14 +155,20 @@ class _HomeScreenState extends State<HomeScreen> with ViewStateMixin {
                                           padding: const EdgeInsets.only(
                                               right: 16.0),
                                           child: ProjectCardView(
+                                            bgColor: primaryBGColor,
                                             onTap: () {
                                               Navigator.push(
                                                   context,
                                                   MaterialPageRoute(
                                                       builder: (_) =>
                                                           ViewProjectScreen(
-                                                              project:
-                                                                  project)));
+                                                            isWhiteBackground:
+                                                                false,
+                                                            projectId:
+                                                                project.id,
+                                                            projectImage:
+                                                                project.photo,
+                                                          )));
                                             },
                                             project: project,
                                           ),

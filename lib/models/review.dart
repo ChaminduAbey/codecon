@@ -20,7 +20,15 @@ class Review {
   Review.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     review = json['review'];
-    rating = json['rating'];
+
+    if (json['rating'] is int) {
+      rating = (json['rating'] as int).toDouble();
+    }
+    if (json['rating'] is String) {
+      rating = double.tryParse(json['rating']) ?? 0;
+    } else {
+      rating = (json['rating'] as num).toDouble();
+    }
     projectId = json['project_id'];
 
     if (json['user'] != null) {

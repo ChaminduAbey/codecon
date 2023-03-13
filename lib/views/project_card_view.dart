@@ -5,9 +5,13 @@ import 'package:flutter/material.dart';
 
 class ProjectCardView extends StatelessWidget {
   const ProjectCardView(
-      {super.key, required this.onTap, required this.project});
+      {super.key,
+      required this.onTap,
+      required this.project,
+      required this.bgColor});
   final Project project;
   final Function() onTap;
+  final Color bgColor;
 
   @override
   Widget build(BuildContext context) {
@@ -27,9 +31,9 @@ class ProjectCardView extends StatelessWidget {
                   blurhash: project.photo.blurhash),
             ),
             Container(
-              decoration: const BoxDecoration(
-                  color: primaryBGColor,
-                  borderRadius: BorderRadius.only(
+              decoration: BoxDecoration(
+                  color: bgColor,
+                  borderRadius: const BorderRadius.only(
                     bottomLeft: Radius.circular(16.0),
                     bottomRight: Radius.circular(16.0),
                   )),

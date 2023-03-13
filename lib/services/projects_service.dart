@@ -1,3 +1,4 @@
+import 'package:client_app/models/issuer.dart';
 import 'package:client_app/models/post_response.dart';
 import 'package:client_app/models/project.dart';
 import 'package:client_app/models/review.dart';
@@ -32,5 +33,24 @@ class ProjectService extends ChangeNotifier {
   Future<PostResponse> addReview({required Review review}) async {
     return await httpService.securePost(
         url: ApiEndpoints.addReview(), body: review.toJson());
+  }
+
+  Future<Issuer> getIssuer(
+      {required int issuerId, required bool isIssuer}) async {
+    return await httpService.get<Issuer>(
+      url: isIssuer
+          ? ApiEndpoints.getIssuer(issuerId: issuerId)
+          : ApiEndpoints.getContractor(contractorId: issuerId),
+      fromJson: (json) => Issuer.fromJson(json),
+    );
+  }
+
+  Future<Project> getProjectById({
+    required int projectId,
+  }) async {
+    return await httpService.get<Project>(
+      url: ApiEndpoints.getProjectById(projectId: projectId),
+      fromJson: (json) => Project.fromJson(json),
+    );
   }
 }
