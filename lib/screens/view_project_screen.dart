@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:client_app/main.dart';
 import 'package:client_app/models/cdn_image.dart';
+import 'package:client_app/models/issuer.dart';
 import 'package:client_app/models/project.dart';
 import 'package:client_app/screens/add_update_review_screen.dart';
 import 'package:client_app/screens/view_issuer_screen.dart';
@@ -180,38 +181,52 @@ class _ViewProjectScreenState extends State<ViewProjectScreen>
                             height: 16,
                           ),
 
-                          Text("What People Think",
-                              style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  color: primaryColor)),
+                          if (project.reviews.isNotEmpty) ...[
+                            Text("What People Think",
+                                style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: primaryColor)),
+                            const SizedBox(
+                              height: 16,
+                            ),
+                            Container(
+                              height: 150,
+                              child: ListView.builder(
+                                  itemExtent:
+                                      MediaQuery.of(context).size.width * 0.9,
+                                  scrollDirection: Axis.horizontal,
+                                  itemCount: project.reviews.length,
+                                  itemBuilder: ((context, index) => Padding(
+                                        padding:
+                                            const EdgeInsets.only(right: 16.0),
+                                        child: ReviewCard(
+                                          review: project.reviews![index],
+                                          bgColor: !widget.isWhiteBackground
+                                              ? Colors.white
+                                              : primaryBGColor,
+                                        ),
+                                      ))),
+                            ),
+                            const SizedBox(
+                              height: 16,
+                            )
+                          ],
 
-                          const SizedBox(
-                            height: 16,
-                          ),
-
-                          Container(
-                            height: 150,
-                            child: ListView.builder(
-                                itemExtent:
-                                    MediaQuery.of(context).size.width * 0.9,
-                                scrollDirection: Axis.horizontal,
-                                itemCount: project.reviews.length,
-                                itemBuilder: ((context, index) => Padding(
-                                      padding:
-                                          const EdgeInsets.only(right: 16.0),
-                                      child: ReviewCard(
-                                        review: project.reviews![index],
-                                        bgColor: !widget.isWhiteBackground
-                                            ? Colors.white
-                                            : primaryBGColor,
-                                      ),
-                                    ))),
-                          ),
-
-                          const SizedBox(
-                            height: 16,
-                          ),
+                          if (project.status == "UPCOMING") ...[
+                            Text("Bids",
+                                style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: primaryColor)),
+                            const SizedBox(
+                              height: 16,
+                            ),
+                            buildBidsSection(childrenBGColor),
+                            const SizedBox(
+                              height: 16,
+                            ),
+                          ],
 
                           Text("Issued By",
                               style: TextStyle(
@@ -228,20 +243,21 @@ class _ViewProjectScreenState extends State<ViewProjectScreen>
                           const SizedBox(
                             height: 16,
                           ),
-                          Text("Contractor",
-                              style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  color: primaryColor)),
 
-                          const SizedBox(
-                            height: 16,
-                          ),
-
-                          contactractorCard(context, childrenBGColor),
-                          const SizedBox(
-                            height: 16,
-                          ),
+                          if (project.status != "UPCOMING") ...[
+                            Text("Contractor",
+                                style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: primaryColor)),
+                            const SizedBox(
+                              height: 16,
+                            ),
+                            contactractorCard(context, childrenBGColor),
+                            const SizedBox(
+                              height: 16,
+                            ),
+                          ],
 
                           const SizedBox(
                             height: 16,
@@ -265,6 +281,84 @@ class _ViewProjectScreenState extends State<ViewProjectScreen>
                 icon: const Icon(Icons.add),
                 label: Text("Add Reivew"),
               ));
+  }
+
+  Widget buildBidsSection(Color childrenBGColor) {
+    return Container(
+      height: 285,
+      child: ListView.builder(
+          itemCount: project.bidders.length,
+          scrollDirection: Axis.horizontal,
+          itemBuilder: (context, index) {
+            final Issuer bidder = project.bidders[index];
+            return GestureDetector(
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => ViewIssuerScreen(
+                            isIssuer: false,
+                            isWhiteBackground: !widget.isWhiteBackground,
+                            issuerId: bidder.id,
+                            issuerImage: bidder.photo)));
+              },
+              child: Container(
+                width: 250,
+                margin: const EdgeInsets.only(right: 16),
+                decoration:
+                    BoxDecoration(borderRadius: BorderRadius.circular(16)),
+                clipBehavior: Clip.antiAliasWithSaveLayer,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    AspectRatio(
+                      aspectRatio: 16 / 12,
+                      child: ImageWidget(
+                          imageUrl: bidder.photo.url,
+                          blurhash: bidder.photo.blurhash),
+                    ),
+                    Container(
+                      decoration: BoxDecoration(
+                          color: childrenBGColor,
+                          borderRadius: const BorderRadius.only(
+                            bottomLeft: Radius.circular(16.0),
+                            bottomRight: Radius.circular(16.0),
+                          )),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            bidder.title,
+                            style: const TextStyle(
+                                color: primaryColor,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 16),
+                          ),
+                          const SizedBox(
+                            height: 8,
+                          ),
+                          Text(
+                            project.description,
+                            maxLines: 2,
+                            style: const TextStyle(
+                                color: primaryColor,
+                                fontWeight: FontWeight.w300,
+                                fontSize: 12),
+                          ),
+                          const SizedBox(
+                            height: 8,
+                          ),
+                        ],
+                      ),
+                    )
+                  ],
+                ),
+              ),
+            );
+          }),
+    );
   }
 
   Widget issuedByCard(BuildContext context, Color childrenBGColor) {

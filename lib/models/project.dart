@@ -14,6 +14,7 @@ class Project {
   late Issuer issuer;
   late Issuer contractor;
   late List<Review> reviews;
+  late List<Issuer> bidders;
 
   Project({
     required this.id,
@@ -25,6 +26,7 @@ class Project {
     required this.photo,
     required this.issuer,
     required this.reviews,
+    required this.bidders,
   });
 
   Project.fromJson(Map<String, dynamic> json) {
@@ -51,6 +53,13 @@ class Project {
       reviews = [];
       json['reviews'].forEach((v) {
         reviews.add(Review.fromJson(v));
+      });
+    }
+
+    if (json['bidders'] != null) {
+      bidders = [];
+      json['bidders'].forEach((v) {
+        bidders.add(Issuer.fromJson(v));
       });
     }
   }

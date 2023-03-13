@@ -39,8 +39,8 @@ class ReviewCard extends StatelessWidget {
                 review.user!.firstName + " " + review.user!.lastName,
                 maxLines: 1,
                 style: TextStyle(
+                    fontWeight: FontWeight.w600,
                     fontSize: 16,
-                    fontWeight: FontWeight.w500,
                     color: primaryColor),
               ),
               const SizedBox(
