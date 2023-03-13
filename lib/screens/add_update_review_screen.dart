@@ -149,7 +149,7 @@ class _AddUpdateReviewState extends State<AddUpdateReview> {
                 height: 32,
               ),
               Text(
-                "Feedback",
+                "Feedback ",
                 style: TextStyle(
                     fontSize: 14,
                     color: greyColor,
