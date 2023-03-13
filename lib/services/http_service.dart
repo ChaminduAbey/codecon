@@ -91,6 +91,8 @@ class HttpService {
   }) async {
     final authToken = await authService.getAuthToken();
 
+    print(authToken);
+
     final response = await client
         .post(Uri.parse(url), body: convert.jsonEncode(body), headers: {
       HttpHeaders.authorizationHeader: "Bearer $authToken",

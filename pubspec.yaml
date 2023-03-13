@@ -45,6 +45,7 @@ dependencies:
   shared_preferences: ^2.0.18
   get_it: ^7.2.0
   google_fonts: ^4.0.3
+  flutter_rating_bar: ^4.0.1
 
 dev_dependencies:
   flutter_test:

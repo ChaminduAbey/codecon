@@ -15,4 +15,8 @@ class ApiEndpoints {
   static String getProjects() {
     return "$baseUrl/projects";
   }
+
+  static String addReview() {
+    return "$baseUrl/reviews";
+  }
 }

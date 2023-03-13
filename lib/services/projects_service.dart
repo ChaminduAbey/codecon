@@ -1,4 +1,6 @@
+import 'package:client_app/models/post_response.dart';
 import 'package:client_app/models/project.dart';
+import 'package:client_app/models/review.dart';
 import 'package:client_app/services/http_service.dart';
 import 'package:flutter/cupertino.dart';
 
@@ -25,5 +27,10 @@ class ProjectService extends ChangeNotifier {
       url: ApiEndpoints.getProjects(),
       fromJson: (json) => Project.fromJson(json),
     );
+  }
+
+  Future<PostResponse> addReview({required Review review}) async {
+    return await httpService.securePost(
+        url: ApiEndpoints.addReview(), body: review.toJson());
   }
 }

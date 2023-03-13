@@ -1,6 +1,9 @@
+import 'dart:developer';
+
 import 'package:client_app/main.dart';
 import 'package:client_app/models/project.dart';
 import 'package:client_app/screens/splash_screen.dart';
+import 'package:client_app/screens/view_project_screen.dart';
 import 'package:client_app/services/auth_service.dart';
 import 'package:client_app/services/user_service.dart';
 import 'package:client_app/theme.dart';
@@ -11,6 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../services/projects_service.dart';
+import '../views/project_card_view.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -23,9 +27,19 @@ class _HomeScreenState extends State<HomeScreen> with ViewStateMixin {
   @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
-      final projects = await getIt<ProjectService>().getProjectsNearBy();
+      try {
+        setBusy();
 
-      getIt<ProjectService>().setProjects(projects);
+        final projects = await getIt<ProjectService>().getProjectsNearBy();
+
+        getIt<ProjectService>().setProjects(projects);
+
+        setIdle();
+      } catch (e) {
+        log("Error in HomeScreen Init", error: e);
+        setError();
+        rethrow;
+      }
     });
 
     super.initState();
@@ -107,7 +121,59 @@ class _HomeScreenState extends State<HomeScreen> with ViewStateMixin {
                 ),
               ),
               BusyErrorChildView(
-                  viewState: viewState, builder: () => Text("hi there"))
+                  viewState: viewState,
+                  builder: () => Consumer<ProjectService>(
+                        builder: (context, projectService, child) {
+                          return Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 16.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const SizedBox(
+                                  height: 24,
+                                ),
+                                Text(
+                                  "Projects Near You",
+                                  style: primaryTitleTxtStyle,
+                                ),
+                                const SizedBox(
+                                  height: 16,
+                                ),
+                                Container(
+                                  height: 400,
+                                  constraints: BoxConstraints(
+                                      minHeight: 400, maxHeight: 400),
+                                  child: ListView.builder(
+                                      physics: const BouncingScrollPhysics(),
+                                      scrollDirection: Axis.horizontal,
+                                      itemCount: projectService.projects.length,
+                                      itemBuilder: ((context, index) {
+                                        final Project project =
+                                            projectService.projects[index];
+                                        return Padding(
+                                          padding: const EdgeInsets.only(
+                                              right: 16.0),
+                                          child: ProjectCardView(
+                                            onTap: () {
+                                              Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                      builder: (_) =>
+                                                          ViewProjectScreen(
+                                                              project:
+                                                                  project)));
+                                            },
+                                            project: project,
+                                          ),
+                                        );
+                                      })),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ))
             ],
           ),
         ),
