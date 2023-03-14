@@ -2,6 +2,7 @@ import 'package:client_app/models/issuer.dart';
 import 'package:client_app/models/post_response.dart';
 import 'package:client_app/models/project.dart';
 import 'package:client_app/models/review.dart';
+import 'package:client_app/models/timeline.dart';
 import 'package:client_app/services/http_service.dart';
 import 'package:flutter/cupertino.dart';
 
@@ -51,6 +52,15 @@ class ProjectService extends ChangeNotifier {
     return await httpService.get<Project>(
       url: ApiEndpoints.getProjectById(projectId: projectId),
       fromJson: (json) => Project.fromJson(json),
+    );
+  }
+
+  Future<List<Timeline>> getTimelineForProject({
+    required int projectId,
+  }) async {
+    return await httpService.getList<Timeline>(
+      url: ApiEndpoints.getTimelineForProject(projectId: projectId),
+      fromJson: (json) => Timeline.fromJson(json),
     );
   }
 }

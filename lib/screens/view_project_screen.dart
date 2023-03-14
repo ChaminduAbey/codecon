@@ -6,24 +6,30 @@ import 'package:client_app/models/issuer.dart';
 import 'package:client_app/models/project.dart';
 import 'package:client_app/screens/add_update_review_screen.dart';
 import 'package:client_app/screens/view_issuer_screen.dart';
+import 'package:client_app/screens/view_timeline_screen.dart';
+import 'package:client_app/utils/hero_unique_id.dart';
 import 'package:client_app/view_state_mixin.dart';
 import 'package:client_app/views/busy_error_child_view.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 
 import '../services/projects_service.dart';
 import '../theme.dart';
 import '../views/image_widget.dart';
 import '../views/review_card.dart';
+import '../views/staggered_animation_child.dart';
 
 class ViewProjectScreen extends StatefulWidget {
   const ViewProjectScreen(
       {super.key,
       required this.projectId,
       required this.projectImage,
-      required this.isWhiteBackground});
+      required this.isWhiteBackground,
+      required this.heroTag});
   final CdnImage projectImage;
   final int projectId;
   final bool isWhiteBackground;
+  final String heroTag;
 
   @override
   State<ViewProjectScreen> createState() => _ViewProjectScreenState();
@@ -65,13 +71,16 @@ class _ViewProjectScreenState extends State<ViewProjectScreen>
             children: [
               Stack(
                 children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.only(
-                      bottomLeft: Radius.circular(20),
-                      bottomRight: Radius.circular(20),
-                    ),
-                    child: ImageWidget.fromCdn(
-                      widget.projectImage,
+                  Hero(
+                    tag: widget.heroTag,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.only(
+                        bottomLeft: Radius.circular(20),
+                        bottomRight: Radius.circular(20),
+                      ),
+                      child: ImageWidget.fromCdn(
+                        widget.projectImage,
+                      ),
                     ),
                   ),
                   // backbutton
@@ -80,11 +89,36 @@ class _ViewProjectScreenState extends State<ViewProjectScreen>
                       top: 16,
                       child: Container(
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: widget.isWhiteBackground
+                              ? Colors.white
+                              : primaryBGColor,
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: BackButton(
                           color: primaryColor,
+                        ),
+                      )),
+
+                  Positioned(
+                      right: 16,
+                      top: 16,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: widget.isWhiteBackground
+                              ? Colors.white
+                              : primaryBGColor,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: IconButton(
+                          icon: Icon(Icons.timeline),
+                          onPressed: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (_) => ViewTimelineScreen(
+                                          project: project,
+                                        )));
+                          },
                         ),
                       )),
                 ],
@@ -100,12 +134,15 @@ class _ViewProjectScreenState extends State<ViewProjectScreen>
                           const SizedBox(
                             height: 24,
                           ),
-                          Text(
-                            project.title,
-                            style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: primaryColor),
+                          StaggerAnimationChild(
+                            index: 0,
+                            child: Text(
+                              project.title,
+                              style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: primaryColor),
+                            ),
                           ),
 
                           const SizedBox(
@@ -113,12 +150,15 @@ class _ViewProjectScreenState extends State<ViewProjectScreen>
                           ),
 
                           // description
-                          Text(
-                            project.description,
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w400,
-                              color: primaryColor,
+                          StaggerAnimationChild(
+                            index: 1,
+                            child: Text(
+                              project.description,
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w400,
+                                color: primaryColor,
+                              ),
                             ),
                           ),
 
@@ -126,55 +166,58 @@ class _ViewProjectScreenState extends State<ViewProjectScreen>
                             height: 16,
                           ),
 
-                          Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(16),
-                                color: childrenBGColor),
-                            child: Column(
-                              children: [
-                                Row(
-                                  children: [
-                                    Expanded(
-                                        child: Text(
-                                      "Est. Time :",
-                                      style: TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.bold,
-                                          color: primaryColor),
-                                    )),
-                                    Text(
-                                      project.estTime,
-                                      style: TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.bold,
-                                          color: primaryColor),
-                                    )
-                                  ],
-                                ),
-                                const SizedBox(
-                                  height: 8,
-                                ),
-                                Row(
-                                  children: [
-                                    Expanded(
-                                        child: Text(
-                                      "Est. Cost  :",
-                                      style: TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.bold,
-                                          color: primaryColor),
-                                    )),
-                                    Text(
-                                      "${project.estCost} LKR",
-                                      style: TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.bold,
-                                          color: primaryColor),
-                                    )
-                                  ],
-                                )
-                              ],
+                          StaggerAnimationChild(
+                            index: 2,
+                            child: Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(16),
+                                  color: childrenBGColor),
+                              child: Column(
+                                children: [
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                          child: Text(
+                                        "Est. Time :",
+                                        style: TextStyle(
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.bold,
+                                            color: primaryColor),
+                                      )),
+                                      Text(
+                                        project.estTime,
+                                        style: TextStyle(
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.bold,
+                                            color: primaryColor),
+                                      )
+                                    ],
+                                  ),
+                                  const SizedBox(
+                                    height: 8,
+                                  ),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                          child: Text(
+                                        "Est. Cost  :",
+                                        style: TextStyle(
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.bold,
+                                            color: primaryColor),
+                                      )),
+                                      Text(
+                                        "${project.estCost} LKR",
+                                        style: TextStyle(
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.bold,
+                                            color: primaryColor),
+                                      )
+                                    ],
+                                  )
+                                ],
+                              ),
                             ),
                           ),
                           const SizedBox(
@@ -182,31 +225,45 @@ class _ViewProjectScreenState extends State<ViewProjectScreen>
                           ),
 
                           if (project.reviews.isNotEmpty) ...[
-                            Text("What People Think",
-                                style: TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                    color: primaryColor)),
+                            StaggerAnimationChild(
+                              index: 3,
+                              child: Text("What People Think",
+                                  style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                      color: primaryColor)),
+                            ),
                             const SizedBox(
                               height: 16,
                             ),
-                            Container(
-                              height: 150,
-                              child: ListView.builder(
-                                  itemExtent:
-                                      MediaQuery.of(context).size.width * 0.9,
-                                  scrollDirection: Axis.horizontal,
-                                  itemCount: project.reviews.length,
-                                  itemBuilder: ((context, index) => Padding(
-                                        padding:
-                                            const EdgeInsets.only(right: 16.0),
-                                        child: ReviewCard(
-                                          review: project.reviews![index],
-                                          bgColor: !widget.isWhiteBackground
-                                              ? Colors.white
-                                              : primaryBGColor,
-                                        ),
-                                      ))),
+                            StaggerAnimationChild(
+                              index: 4,
+                              child: Container(
+                                height: 150,
+                                child: AnimationLimiter(
+                                  child: ListView.builder(
+                                      itemExtent:
+                                          MediaQuery.of(context).size.width *
+                                              0.9,
+                                      scrollDirection: Axis.horizontal,
+                                      itemCount: project.reviews.length,
+                                      itemBuilder: ((context, index) =>
+                                          StaggerAnimationChild(
+                                            index: index + 4,
+                                            child: Padding(
+                                              padding: const EdgeInsets.only(
+                                                  right: 16.0),
+                                              child: ReviewCard(
+                                                review: project.reviews![index],
+                                                bgColor:
+                                                    !widget.isWhiteBackground
+                                                        ? Colors.white
+                                                        : primaryBGColor,
+                                              ),
+                                            ),
+                                          ))),
+                                ),
+                              ),
                             ),
                             const SizedBox(
                               height: 16,
@@ -214,15 +271,20 @@ class _ViewProjectScreenState extends State<ViewProjectScreen>
                           ],
 
                           if (project.status == "UPCOMING") ...[
-                            Text("Bids",
-                                style: TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                    color: primaryColor)),
+                            StaggerAnimationChild(
+                              index: 3,
+                              child: Text("Bids",
+                                  style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                      color: primaryColor)),
+                            ),
                             const SizedBox(
                               height: 16,
                             ),
-                            buildBidsSection(childrenBGColor),
+                            StaggerAnimationChild(
+                                index: 4,
+                                child: buildBidsSection(childrenBGColor)),
                             const SizedBox(
                               height: 16,
                             ),
@@ -291,6 +353,7 @@ class _ViewProjectScreenState extends State<ViewProjectScreen>
           scrollDirection: Axis.horizontal,
           itemBuilder: (context, index) {
             final Issuer bidder = project.bidders[index];
+            final String uniqueHeroTag = HeroUniqueId.get();
             return GestureDetector(
               onTap: () {
                 Navigator.push(
@@ -298,6 +361,7 @@ class _ViewProjectScreenState extends State<ViewProjectScreen>
                     MaterialPageRoute(
                         builder: (_) => ViewIssuerScreen(
                             isIssuer: false,
+                            heroTag: uniqueHeroTag,
                             isWhiteBackground: !widget.isWhiteBackground,
                             issuerId: bidder.id,
                             issuerImage: bidder.photo)));
@@ -313,9 +377,18 @@ class _ViewProjectScreenState extends State<ViewProjectScreen>
                   children: [
                     AspectRatio(
                       aspectRatio: 16 / 12,
-                      child: ImageWidget(
-                          imageUrl: bidder.photo.url,
-                          blurhash: bidder.photo.blurhash),
+                      child: Hero(
+                        tag: uniqueHeroTag,
+                        child: ClipRRect(
+                          borderRadius: const BorderRadius.only(
+                            topLeft: Radius.circular(16.0),
+                            topRight: Radius.circular(16.0),
+                          ),
+                          child: ImageWidget(
+                              imageUrl: bidder.photo.url,
+                              blurhash: bidder.photo.blurhash),
+                        ),
+                      ),
                     ),
                     Container(
                       decoration: BoxDecoration(
@@ -362,12 +435,14 @@ class _ViewProjectScreenState extends State<ViewProjectScreen>
   }
 
   Widget issuedByCard(BuildContext context, Color childrenBGColor) {
+    final String uniqueHeroTag = HeroUniqueId.get();
     return GestureDetector(
       onTap: () => Navigator.push(
           context,
           MaterialPageRoute(
               builder: (_) => ViewIssuerScreen(
                   issuerId: project.issuer.id,
+                  heroTag: uniqueHeroTag,
                   issuerImage: project.issuer.photo,
                   isIssuer: true,
                   isWhiteBackground: !widget.isWhiteBackground))),
@@ -379,9 +454,18 @@ class _ViewProjectScreenState extends State<ViewProjectScreen>
           children: [
             AspectRatio(
               aspectRatio: 16 / 9,
-              child: ImageWidget(
-                  imageUrl: project.issuer.photo.url,
-                  blurhash: project.issuer.photo.blurhash),
+              child: Hero(
+                tag: uniqueHeroTag,
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(16.0),
+                    topRight: Radius.circular(16.0),
+                  ),
+                  child: ImageWidget(
+                      imageUrl: project.issuer.photo.url,
+                      blurhash: project.issuer.photo.blurhash),
+                ),
+              ),
             ),
             Container(
               decoration: BoxDecoration(
@@ -425,11 +509,13 @@ class _ViewProjectScreenState extends State<ViewProjectScreen>
   }
 
   Widget contactractorCard(BuildContext context, Color childrenBGColor) {
+    final String uniqueHeroTag = HeroUniqueId.get();
     return GestureDetector(
       onTap: () => Navigator.push(
           context,
           MaterialPageRoute(
               builder: (_) => ViewIssuerScreen(
+                  heroTag: uniqueHeroTag,
                   issuerId: project.contractor.id,
                   issuerImage: project.contractor.photo,
                   isIssuer: false,
@@ -442,9 +528,18 @@ class _ViewProjectScreenState extends State<ViewProjectScreen>
           children: [
             AspectRatio(
               aspectRatio: 16 / 9,
-              child: ImageWidget(
-                  imageUrl: project.contractor.photo.url,
-                  blurhash: project.contractor.photo.blurhash),
+              child: Hero(
+                tag: uniqueHeroTag,
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(16.0),
+                    topRight: Radius.circular(16.0),
+                  ),
+                  child: ImageWidget(
+                      imageUrl: project.contractor.photo.url,
+                      blurhash: project.contractor.photo.blurhash),
+                ),
+              ),
             ),
             Container(
               decoration: BoxDecoration(

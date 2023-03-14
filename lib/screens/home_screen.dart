@@ -7,10 +7,14 @@ import 'package:client_app/screens/view_project_screen.dart';
 import 'package:client_app/services/auth_service.dart';
 import 'package:client_app/services/user_service.dart';
 import 'package:client_app/theme.dart';
+import 'package:client_app/utils/hero_unique_id.dart';
 import 'package:client_app/view_state_mixin.dart';
 import 'package:client_app/views/busy_error_child_view.dart';
 import 'package:client_app/views/image_widget.dart';
+import 'package:client_app/views/staggered_animation_child.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:provider/provider.dart';
 
 import '../services/projects_service.dart';
@@ -76,27 +80,59 @@ class _HomeScreenState extends State<HomeScreen> with ViewStateMixin {
           ],
         ),
         drawer: Drawer(
-          child: Column(
-            children: [
-              ListTile(
-                title: Text("Home"),
-                onTap: () {
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                title: Text("Logout"),
-                onTap: () async {
-                  await getIt<AuthService>().logout();
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const SplashScreen(),
+          child: SafeArea(
+            child: Column(
+              children: [
+                Column(
+                  children: [
+                    Container(
+                        height: 120,
+                        width: 120,
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                        ),
+                        clipBehavior: Clip.antiAliasWithSaveLayer,
+                        child: ImageWidget.fromCdn(userService.user.photo!)),
+                    const SizedBox(height: 16.0),
+                    Text(
+                      "${userService.user.firstName} ${userService.user.lastName}",
+                      style: const TextStyle(
+                        color: primaryColor,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  );
-                },
-              ),
-            ],
+                    Text(
+                      userService.user.email,
+                      style: const TextStyle(
+                        color: greyColor,
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                Expanded(
+                  child: Align(
+                    alignment: Alignment.bottomLeft,
+                    child: ListTile(
+                      title: Text("Logout",
+                          style: primaryTitleTxtStyle.copyWith(fontSize: 16)),
+                      trailing: const Icon(Icons.logout, color: primaryColor),
+                      onTap: () async {
+                        await getIt<AuthService>().logout();
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const SplashScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
         body: SingleChildScrollView(
@@ -123,57 +159,72 @@ class _HomeScreenState extends State<HomeScreen> with ViewStateMixin {
               BusyErrorChildView(
                   viewState: viewState,
                   builder: () => Consumer<ProjectService>(
-                        builder: (context, projectService, child) {
-                          return Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 16.0),
+                        builder: (_, projectService, child) {
+                          return AnimationLimiter(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 const SizedBox(
                                   height: 24,
                                 ),
-                                Text(
-                                  "Projects Near You",
-                                  style: primaryTitleTxtStyle,
+                                StaggerAnimationChild(
+                                  index: 0,
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 16.0),
+                                    child: Text(
+                                      "Projects Near You",
+                                      style: primaryTitleTxtStyle,
+                                    ),
+                                  ),
                                 ),
                                 const SizedBox(
                                   height: 16,
                                 ),
-                                Container(
-                                  height: 400,
-                                  constraints: BoxConstraints(
-                                      minHeight: 400, maxHeight: 400),
+                                SizedBox(
+                                  height: 335,
                                   child: ListView.builder(
                                       physics: const BouncingScrollPhysics(),
+                                      padding:
+                                          const EdgeInsets.only(left: 16.0),
                                       scrollDirection: Axis.horizontal,
                                       itemCount: projectService.projects.length,
                                       itemBuilder: ((context, index) {
                                         final Project project =
                                             projectService.projects[index];
-                                        return Padding(
-                                          padding: const EdgeInsets.only(
-                                              right: 16.0),
-                                          child: ProjectCardView(
-                                            bgColor: primaryBGColor,
-                                            onTap: () {
-                                              Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                      builder: (_) =>
-                                                          ViewProjectScreen(
-                                                            isWhiteBackground:
-                                                                false,
-                                                            projectId:
-                                                                project.id,
-                                                            projectImage:
-                                                                project.photo,
-                                                          )));
-                                            },
-                                            project: project,
+                                        final String heroTag =
+                                            HeroUniqueId.get();
+                                        return StaggerAnimationChild(
+                                          index: 1 + index,
+                                          child: Padding(
+                                            padding: const EdgeInsets.only(
+                                                right: 16.0),
+                                            child: ProjectCardView(
+                                              heroTag: heroTag,
+                                              bgColor: primaryBGColor,
+                                              onTap: () {
+                                                Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                        builder: (_) =>
+                                                            ViewProjectScreen(
+                                                              heroTag: heroTag,
+                                                              isWhiteBackground:
+                                                                  false,
+                                                              projectId:
+                                                                  project.id,
+                                                              projectImage:
+                                                                  project.photo,
+                                                            )));
+                                              },
+                                              project: project,
+                                            ),
                                           ),
                                         );
                                       })),
+                                ),
+                                const SizedBox(
+                                  height: 24,
                                 ),
                               ],
                             ),

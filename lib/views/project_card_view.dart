@@ -8,10 +8,12 @@ class ProjectCardView extends StatelessWidget {
       {super.key,
       required this.onTap,
       required this.project,
-      required this.bgColor});
+      required this.bgColor,
+      required this.heroTag});
   final Project project;
   final Function() onTap;
   final Color bgColor;
+  final String heroTag;
 
   @override
   Widget build(BuildContext context) {
@@ -19,16 +21,26 @@ class ProjectCardView extends StatelessWidget {
       onTap: onTap,
       child: Container(
         width: 250,
-        decoration: BoxDecoration(borderRadius: BorderRadius.circular(16)),
+        decoration: BoxDecoration(
+            color: bgColor, borderRadius: BorderRadius.circular(16)),
         clipBehavior: Clip.antiAliasWithSaveLayer,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             AspectRatio(
               aspectRatio: 16 / 12,
-              child: ImageWidget(
-                  imageUrl: project.photo.url,
-                  blurhash: project.photo.blurhash),
+              child: Hero(
+                tag: heroTag,
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(16.0),
+                    topRight: Radius.circular(16.0),
+                  ),
+                  child: ImageWidget(
+                      imageUrl: project.photo.url,
+                      blurhash: project.photo.blurhash),
+                ),
+              ),
             ),
             Container(
               decoration: BoxDecoration(

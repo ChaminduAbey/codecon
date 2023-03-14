@@ -3,6 +3,7 @@ import 'package:client_app/main.dart';
 import 'package:client_app/screens/splash_screen.dart';
 import 'package:client_app/services/auth_service.dart';
 import 'package:client_app/view_state_mixin.dart';
+import 'package:client_app/views/constrained_button_view.dart';
 import 'package:client_app/views/image_widget.dart';
 import 'package:flutter/material.dart';
 
@@ -47,8 +48,14 @@ class _SelectLoginUserScreenState extends State<SelectLoginUserScreen> {
               tag: "primary-logo",
               child: Image.asset("assets/graphics/logo.png")),
           const SizedBox(height: 16.0),
-          ElevatedButton(
-              onPressed: () => _showBottomSheet(), child: Text("Select User"))
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: ConstrainedButton(
+              child: ElevatedButton(
+                  onPressed: () => _showBottomSheet(),
+                  child: Text("Select User")),
+            ),
+          )
         ],
       ),
     );
@@ -119,11 +126,14 @@ class __UserListViewState extends State<_UserListView> with ViewStateMixin {
             itemCount: users.length,
             itemBuilder: (context, index) {
               return ListTile(
-                leading: ClipRRect(
-                  borderRadius: BorderRadius.circular(50.0),
-                  child: ImageWidget(
-                      imageUrl: users[index].photo!.url,
-                      blurhash: users[index].photo!.blurhash),
+                leading: AspectRatio(
+                  aspectRatio: 1,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(50.0),
+                    child: ImageWidget(
+                        imageUrl: users[index].photo!.url,
+                        blurhash: users[index].photo!.blurhash),
+                  ),
                 ),
                 title:
                     Text("${users[index].firstName} ${users[index].lastName}"),

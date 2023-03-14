@@ -1,5 +1,5 @@
 class ApiEndpoints {
-  static String baseUrl = "http://192.168.1.29:3000";
+  static String baseUrl = "https://codecon.ego.surf";
   String getUsers() {
     return "$baseUrl/users";
   }
@@ -36,5 +36,11 @@ class ApiEndpoints {
     required int contractorId,
   }) {
     return "$baseUrl/contractors/$contractorId";
+  }
+
+  static String getTimelineForProject({
+    required int projectId,
+  }) {
+    return "$baseUrl/projects/$projectId/timeline";
   }
 }

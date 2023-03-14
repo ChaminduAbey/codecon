@@ -6,6 +6,7 @@ import 'package:client_app/services/http_service.dart';
 import 'package:client_app/services/user_service.dart';
 import 'package:client_app/theme.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:get_it/get_it.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
