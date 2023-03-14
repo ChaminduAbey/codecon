@@ -7,38 +7,58 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model images {
-  id       Int        @id @default(autoincrement())
-  blurhash String     @db.VarChar(45)
-  url      String     @db.VarChar(200)
-  projects projects[]
-  user     user[]
+model contractor {
+  id          Int        @id
+  title       String?    @db.VarChar(45)
+  description String?    @db.VarChar(450)
+  image_id    Int?
+  bidders     bidders[]
+  images      images?    @relation(fields: [image_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "contractor_image_fk")
+  projects    projects[]
+
+  @@index([image_id], map: "contractor_image_fk_idx")
 }
 
-model user {
-  id        Int       @id @default(autoincrement())
-  firstName String    @db.VarChar(45)
-  lastName  String    @db.VarChar(45)
-  email     String    @db.VarChar(45)
-  photo_id  Int
-  reviews   reviews[]
-  images    images    @relation(fields: [photo_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "user_images_fk")
+model images {
+  id         Int          @id @default(autoincrement())
+  blurhash   String       @db.VarChar(45)
+  url        String       @db.VarChar(200)
+  contractor contractor[]
+  issuer     issuer[]
+  projects   projects[]
+  user       user[]
+}
 
-  @@index([photo_id], map: "user_images_fk_idx")
+model issuer {
+  id          Int        @id @default(autoincrement())
+  title       String     @db.VarChar(45)
+  description String     @db.VarChar(450)
+  image_id    Int
+  images      images     @relation(fields: [image_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "issuer_images_fk")
+  projects    projects[]
+
+  @@index([image_id], map: "issuer_images_fk_idx")
 }
 
 model projects {
-  id          Int       @id @default(autoincrement())
-  title       String    @db.VarChar(45)
-  description String    @db.VarChar(4500)
-  est_time    String    @db.VarChar(45)
-  est_cost    Int
-  status      String    @default("UPCOMING") @db.VarChar(45)
-  image_id    Int       @default(1)
-  images      images    @relation(fields: [image_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "projects_image_fk")
-  reviews     reviews[]
+  id            Int         @id @default(autoincrement())
+  title         String      @db.VarChar(45)
+  description   String      @db.VarChar(4500)
+  est_time      String      @db.VarChar(45)
+  est_cost      Int
+  status        String      @default("UPCOMING") @db.VarChar(45)
+  image_id      Int         @default(1)
+  issuer_id     Int         @default(1)
+  contractor_id Int?
+  bidders       bidders[]
+  contractor    contractor? @relation(fields: [contractor_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "projects_contractor_fk")
+  images        images      @relation(fields: [image_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "projects_image_fk")
+  issuer        issuer      @relation(fields: [issuer_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "projects_issuer_fk")
+  reviews       reviews[]
 
   @@index([image_id], map: "image_id_idx")
+  @@index([contractor_id], map: "projects_contractor_fk_idx")
+  @@index([issuer_id], map: "projects_issuer_fk_idx")
 }
 
 model reviews {
@@ -53,4 +73,39 @@ model reviews {
   @@id([id, project_id, user_id, review, rating])
   @@index([project_id], map: "reviews_project_fk_idx")
   @@index([user_id], map: "reviews_user_fk_idx")
+}
+
+model user {
+  id        Int       @id @default(autoincrement())
+  firstName String    @db.VarChar(45)
+  lastName  String    @db.VarChar(45)
+  email     String    @db.VarChar(45)
+  photo_id  Int
+  reviews   reviews[]
+  images    images    @relation(fields: [photo_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "user_images_fk")
+
+  @@index([photo_id], map: "user_images_fk_idx")
+}
+
+model bidders {
+  id            Int        @id @default(autoincrement())
+  project_id    Int
+  contractor_id Int
+  contractor    contractor @relation(fields: [contractor_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "bidders_contactor_fk")
+  projects      projects   @relation(fields: [project_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "bidders_project_fk")
+
+  @@index([contractor_id], map: "bidders_contactor_fk_idx")
+  @@index([project_id], map: "bidders_project_fk_idx")
+}
+
+model timeline {
+  id             Int        @id @default(autoincrement())
+  text           String     @db.VarChar(505)
+  date           DateTime?  @default(now()) @db.DateTime(0)
+  order          Int        @default(20)
+  project_id     Int
+  timeline       timeline   @relation("timelineTotimeline", fields: [project_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "timeline_project")
+  other_timeline timeline[] @relation("timelineTotimeline")
+
+  @@index([project_id], map: "timeline_project_idx")
 }

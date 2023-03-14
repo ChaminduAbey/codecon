@@ -27,24 +27,38 @@ export default function ({ app }: { app: express.Router }) {
 
         console.log(user);
 
-        const review = await prismaService.client.reviews.create({
-          data: {
-            review: req.body.review,
-            rating: req.body.rating,
-            user: {
-              connect: {
-                id: user.id,
+        prismaService.client.$transaction([
+          prismaService.client.reviews.create({
+            data: {
+              review: req.body.review,
+              rating: req.body.rating,
+              user: {
+                connect: {
+                  id: user.id,
+                },
+              },
+              projects: {
+                connect: {
+                  id: req.body.project_id,
+                },
               },
             },
-            projects: {
-              connect: {
-                id: req.body.project_id,
-              },
-            },
-          },
-        });
+          }),
 
-        res.send(review);
+          prismaService.client.timeline.create({
+            data: {
+              text: `Review placed by ${
+                user.firstName + " " + user.lastName
+              } (${req.body.rating} Stars)`,
+
+              project_id: req.body.project_id,
+            },
+          }),
+        ]);
+
+        res.status(200).send({
+          message: "Review created",
+        });
       } catch (err) {
         console.log(err);
         res.status(500).send({
